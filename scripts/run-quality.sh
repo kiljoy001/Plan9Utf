@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# Builds and tests Plan9.Utf. With --mutate, runs Stryker over the library too, and fails on any
-# mutant left alive, uncovered or timed out that quality/stryker-accepted.json does not explain.
+# Builds, tests and packs Plan9.Utf. With --mutate, runs Stryker over the library too, and fails on
+# any mutant left alive, uncovered or timed out that quality/stryker-accepted.json does not explain.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
 dotnet build Plan9Utf.slnx -c Release -warnaserror
 dotnet test Plan9Utf.slnx -c Release --no-build
+dotnet pack Plan9.Utf/Plan9.Utf.csproj -c Release --no-build -warnaserror -o .artifacts/package
 
 if [[ "${1:-}" == "--mutate" ]]; then
   (cd Plan9.Utf.Tests && dotnet stryker --config-file ../stryker-config.json --reporter json --reporter progress --output ../.artifacts/stryker --skip-version-check --break-on-initial-test-failure --verbosity error) || true

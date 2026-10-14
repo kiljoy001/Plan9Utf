@@ -20,6 +20,10 @@ rune like any other:
 
 ## Use
 
+```sh
+dotnet add package Plan9.Utf
+```
+
 ```csharp
 using Plan9.Utf;
 
@@ -70,6 +74,10 @@ C would write past the end of a buffer, the call is refused and nothing is writt
 
 ```sh
 dotnet test
+bash scripts/run-quality.sh
 ```
+
+`run-quality.sh` builds with warnings as errors, runs the tests and packs the package into
+`.artifacts/package`.
 
 The features in `Plan9.Utf.Tests/Features` give the behaviour, row by row, against the C.

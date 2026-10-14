@@ -4,6 +4,7 @@
     <PackageId>Plan9.Utf</PackageId>
     <VersionPrefix>0.1.0</VersionPrefix>
     <Authors>Scott J Guyton</Authors>
+    <Copyright>Copyright (c) 2026 Scott J Guyton</Copyright>
     <Description>9front's UTF-8: libc's rune and utf functions, and a System.Text.Encoding that reads and writes text as Plan 9 does.</Description>
     <PackageTags>plan9;9front;utf-8;rune;encoding</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -11,10 +12,15 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Deterministic>true</Deterministic>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\README.md" Pack="true" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\THIRD_PARTY_NOTICES.md" Pack="true" PackagePath="\" />
     <InternalsVisibleTo Include="Plan9.Utf.Tests" />
   </ItemGroup>
 
