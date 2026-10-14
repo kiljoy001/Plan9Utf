@@ -9,6 +9,9 @@
     <PackageTags>plan9;9front;utf-8;rune;encoding</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/kiljoy001/Plan9Utf</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/kiljoy001/Plan9Utf</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <Deterministic>true</Deterministic>
