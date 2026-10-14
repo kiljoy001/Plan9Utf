@@ -51,6 +51,7 @@ Feature: Runes go to and from UTF-8 as 9front's libc does
       | f0 90 80       | 0xFFFD   | 1      |
       | f0 90 80 41    | 0xFFFD   | 1      |
       | f8 88 80 80 80 | 0xFFFD   | 1      |
+      | f8 90 80 80    | 0xFFFD   | 1      |
       | fe             | 0xFFFD   | 1      |
       | ff             | 0xFFFD   | 1      |
       | ef bf bd       | 0xFFFD   | 3      |
@@ -147,6 +148,7 @@ Feature: Runes go to and from UTF-8 as 9front's libc does
       | c2 80          | true   |
       | df 41          | true   |
       | e0             | false  |
+      | e0 a0          | false  |
       | e2 82          | false  |
       | e2 82 ac       | true   |
       | ef 41 41       | true   |

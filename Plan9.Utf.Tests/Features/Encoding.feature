@@ -26,6 +26,7 @@ Feature: .NET text goes to and from UTF-8 as Plan 9 reads and writes it
       | 41 00 42          | 0041 0000 0042      | 0041 0000 0042 |
       | e2 82 ac          | 20AC                | 20AC           |
       | ef bf bd          | FFFD                | FFFD           |
+      | ef bf bf          | FFFF                | FFFF           |
       | f0 9f 98 80       | D83D DE00           | D83D DE00      |
       | 80 41             | FFFD 0041           | FFFD 0041      |
       | c0 80             | FFFD FFFD           | FFFD FFFD      |
@@ -121,13 +122,58 @@ Feature: .NET text goes to and from UTF-8 as Plan 9 reads and writes it
       | D83D / D83D / DE00    | ed a0 bd f0 9f 98 80 |
       | DE00 / D83D           | ed b8 80 ed a0 bd |
 
+  @UTF_014
+  Scenario Outline: A decoder's and an encoder's array calls flush only when asked
+    When a Plan 9 <coder> <writes> "<pieces>" through arrays and is flushed
+    Then the <result> "<expected>"
+
+    Examples:
+      | coder   | writes | pieces            | result    | expected    |
+      | decoder | reads  | e2 / 82 ac        | text is   | 20AC        |
+      | decoder | reads  | f0 / 9f 98 / 80   | text is   | D83D DE00   |
+      | decoder | reads  | e2 82 /           | text is   | FFFD FFFD   |
+      | encoder | writes | D83D / DE00       | bytes are | f0 9f 98 80 |
+      | encoder | writes | D83D /            | bytes are | ed a0 bd    |
+
   @UTF_015
-  Scenario Outline: The most a count of characters or bytes can come to holds what an encoder or decoder may have left
+  Scenario Outline: The most a count of characters or bytes can come to holds what an encoder or decoder may have left, and is refused past int.MaxValue
     When the Plan 9 encoding is asked the most for <count>
     Then it is <bytes> bytes and <chars> characters
 
     Examples:
-      | count | bytes | chars |
-      | 0     | 3     | 3     |
-      | 1     | 6     | 4     |
-      | 10    | 33    | 13    |
+      | count      | bytes      | chars      |
+      | 0          | 3          | 3          |
+      | 1          | 6          | 4          |
+      | 10         | 33         | 13         |
+      | 715827881  | 2147483646 | 715827884  |
+      | 715827882  | refused    | 715827885  |
+      | 2147483644 | refused    | 2147483647 |
+      | 2147483645 | refused    | refused    |
+      | -1         | refused    | refused    |
+
+  @UTF_016
+  Scenario: The encoding is Plan 9 UTF-8 by name, UTF-8 on the web, and equal only to itself
+    Then the Plan 9 encoding is named "Plan 9 UTF-8", with the web name "utf-8" and the code page 65001
+    And it is equal to another Plan 9 encoding, with the same hash, and not to .NET's UTF-8
+
+  @UTF_017
+  Scenario Outline: Arguments are refused as .NET's UTF-8 refuses them
+    When <call> is called on the Plan 9 encoding and on .NET's UTF-8
+    Then both throw <exception>
+
+    Examples:
+      | call                                       | exception                   |
+      | GetByteCount with no characters            | ArgumentNullException       |
+      | GetBytes with no characters                | ArgumentNullException       |
+      | GetBytes with nowhere to write             | ArgumentNullException       |
+      | GetCharCount with no bytes                 | ArgumentNullException       |
+      | GetChars with no bytes                     | ArgumentNullException       |
+      | GetChars with nowhere to write             | ArgumentNullException       |
+      | GetBytes of a euro into two bytes          | ArgumentException           |
+      | GetChars of an emoji into one character    | ArgumentException           |
+      | a decoder's GetCharCount with no bytes     | ArgumentNullException       |
+      | a decoder's GetChars with no bytes         | ArgumentNullException       |
+      | a decoder's GetChars with nowhere to write | ArgumentNullException       |
+      | an encoder's GetByteCount with no characters | ArgumentNullException     |
+      | an encoder's GetBytes with no characters   | ArgumentNullException       |
+      | an encoder's GetBytes with nowhere to write | ArgumentNullException      |

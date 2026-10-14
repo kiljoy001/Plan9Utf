@@ -9,6 +9,9 @@ namespace Plan9.Utf;
 /// </summary>
 public sealed class Plan9Utf8Encoding : Encoding
 {
+    // The most of a sequence a decoder holds: one byte short of the longest.
+    private const int MostHeld = Utf.UtfMax - 1;
+
     public Plan9Utf8Encoding()
         : base(65001)
     {
@@ -35,7 +38,7 @@ public sealed class Plan9Utf8Encoding : Encoding
     public override int GetByteCount(ReadOnlySpan<char> chars)
     {
         char high = '\0';
-        return Encode(chars, [], write: false, flush: true, ref high);
+        return Encode(chars, default, write: false, flush: true, ref high);
     }
 
     public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
@@ -60,7 +63,7 @@ public sealed class Plan9Utf8Encoding : Encoding
     public override int GetCharCount(ReadOnlySpan<byte> bytes)
     {
         int held = 0;
-        return Decode(bytes, [], write: false, flush: true, stackalloc byte[Utf.UtfMax - 1], ref held);
+        return Decode(bytes, default, write: false, flush: true, stackalloc byte[MostHeld], ref held);
     }
 
     public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
@@ -73,23 +76,23 @@ public sealed class Plan9Utf8Encoding : Encoding
     public override int GetChars(ReadOnlySpan<byte> bytes, Span<char> chars)
     {
         int held = 0;
-        return Decode(bytes, chars, write: true, flush: true, stackalloc byte[Utf.UtfMax - 1], ref held);
+        return Decode(bytes, chars, write: true, flush: true, stackalloc byte[MostHeld], ref held);
     }
 
     // Each character is at most three bytes, as is a high surrogate an encoder holds.
     public override int GetMaxByteCount(int charCount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(charCount);
-        long most = (charCount + 1L) * 3;
-        return most <= int.MaxValue ? (int)most : throw new ArgumentOutOfRangeException(nameof(charCount));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(charCount, (int.MaxValue / 3) - 1);
+        return (charCount + 1) * 3;
     }
 
     // Each byte is at most a character, as is each of the bytes a decoder holds.
     public override int GetMaxCharCount(int byteCount)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(byteCount);
-        long most = byteCount + (Utf.UtfMax - 1L);
-        return most <= int.MaxValue ? (int)most : throw new ArgumentOutOfRangeException(nameof(byteCount));
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(byteCount, int.MaxValue - MostHeld);
+        return byteCount + MostHeld;
     }
 
     // Reads what is held and then the bytes, keeping in held, unless flushing, a sequence the
@@ -159,14 +162,10 @@ public sealed class Plan9Utf8Encoding : Encoding
         if (length == 1)
         {
             chars[at] = (char)rune;
-        }
-        else
-        {
-            chars[at] = (char)(0xD800 + ((rune - 0x10000) >> 10));
-            chars[at + 1] = (char)(0xDC00 + ((rune - 0x10000) & 0x3FF));
+            return at + 1;
         }
 
-        return at + length;
+        return at + new Rune(rune).EncodeToUtf16(chars[at..]);
     }
 
     // Writes the characters, a high surrogate and the low one after it as the rune they pair to,
@@ -226,7 +225,7 @@ public sealed class Plan9Utf8Encoding : Encoding
 
     private sealed class Plan9Decoder : Decoder
     {
-        private readonly byte[] held = new byte[Utf.UtfMax - 1];
+        private readonly byte[] held = new byte[MostHeld];
         private int heldCount;
 
         public override void Reset() => heldCount = 0;
@@ -244,7 +243,7 @@ public sealed class Plan9Utf8Encoding : Encoding
             Span<byte> copy = stackalloc byte[held.Length];
             held.CopyTo(copy);
             int count = heldCount;
-            return Decode(bytes, [], write: false, flush, copy, ref count);
+            return Decode(bytes, default, write: false, flush, copy, ref count);
         }
 
         public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
@@ -276,7 +275,7 @@ public sealed class Plan9Utf8Encoding : Encoding
         public override int GetByteCount(ReadOnlySpan<char> chars, bool flush)
         {
             char copy = high;
-            return Encode(chars, [], write: false, flush, ref copy);
+            return Encode(chars, default, write: false, flush, ref copy);
         }
 
         public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex, bool flush)

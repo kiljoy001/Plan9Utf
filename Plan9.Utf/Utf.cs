@@ -48,10 +48,11 @@ public static class Utf
             return Bad(out rune);
         }
 
+        // A continuation byte, below T2, starts no rune.
         if (c < T3)
         {
             int l = ((c << Bitx) | c1) & Rune2;
-            if (c < T2 || l <= Rune1)
+            if ((c & Testx) == Tx || l <= Rune1)
             {
                 return Bad(out rune);
             }
@@ -194,29 +195,18 @@ public static class Utf
         return n >= 4;
     }
 
+    // utflen steps over a byte below Runeself itself, as chartorune would.
     public static int UtfLen(ReadOnlySpan<byte> s)
     {
         int n = 0;
         int i = 0;
-        while (true)
+        while (At(s, i) != 0)
         {
-            int c = At(s, i);
-            if (c < RuneSelf)
-            {
-                if (c == 0)
-                {
-                    return n;
-                }
-
-                i++;
-            }
-            else
-            {
-                i += CharToRune(out _, s[i..]);
-            }
-
+            i += CharToRune(out _, s[i..]);
             n++;
         }
+
+        return n;
     }
 
     // utfnlen, over all the bytes given.

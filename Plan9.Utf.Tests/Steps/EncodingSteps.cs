@@ -9,6 +9,9 @@ public sealed class EncodingSteps(Outcome outcome)
 {
     private readonly Plan9Utf8Encoding plan9 = Plan9Utf8Encoding.Instance;
     private int most;
+    private string mostBytes = string.Empty;
+    private string mostChars = string.Empty;
+    private string[] refusals = [];
 
     [When(@"^the Plan 9 encoding reads ""(.*)""$")]
     public void WhenReads(string bytes)
@@ -94,17 +97,127 @@ public sealed class EncodingSteps(Outcome outcome)
         outcome.Bytes = [.. bytes];
     }
 
-    [When(@"^the Plan 9 encoding is asked the most for (\d+)$")]
-    public void WhenMost(int count)
+    [When(@"^a Plan 9 decoder reads ""(.*)"" through arrays and is flushed$")]
+    public void WhenDecoderReadsArrays(string pieces)
     {
-        outcome.Count = plan9.GetMaxByteCount(count);
-        most = plan9.GetMaxCharCount(count);
+        Decoder decoder = plan9.GetDecoder();
+        var text = new StringBuilder();
+        string[] split = pieces.Split('/');
+        for (int i = 0; i < split.Length; i++)
+        {
+            byte[] piece = Outcome.Hex(split[i]);
+            bool flush = i == split.Length - 1;
+            char[] chars = new char[flush ? decoder.GetCharCount(piece, 0, piece.Length, flush) : decoder.GetCharCount(piece, 0, piece.Length)];
+            int written = flush ? decoder.GetChars(piece, 0, piece.Length, chars, 0, flush) : decoder.GetChars(piece, 0, piece.Length, chars, 0);
+            Assert.Equal(chars.Length, written);
+            text.Append(chars);
+        }
+
+        outcome.Text = text.ToString();
     }
 
-    [Then(@"^it is (\d+) bytes and (\d+) characters$")]
-    public void ThenMost(int bytes, int chars)
+    [When(@"^a Plan 9 encoder writes ""(.*)"" through arrays and is flushed$")]
+    public void WhenEncoderWritesArrays(string pieces)
     {
-        Assert.Equal(bytes, outcome.Count);
-        Assert.Equal(chars, most);
+        Encoder encoder = plan9.GetEncoder();
+        var bytes = new List<byte>();
+        string[] split = pieces.Split('/');
+        for (int i = 0; i < split.Length; i++)
+        {
+            char[] piece = Outcome.Units(split[i]).ToCharArray();
+            bool flush = i == split.Length - 1;
+            byte[] written = new byte[encoder.GetByteCount(piece, 0, piece.Length, flush)];
+            Assert.Equal(written.Length, encoder.GetBytes(piece, 0, piece.Length, written, 0, flush));
+            bytes.AddRange(written);
+        }
+
+        outcome.Bytes = [.. bytes];
+    }
+
+    [When(@"^the Plan 9 encoding is asked the most for (-?\d+)$")]
+    public void WhenMost(int count)
+    {
+        mostBytes = Most(() => plan9.GetMaxByteCount(count));
+        mostChars = Most(() => plan9.GetMaxCharCount(count));
+    }
+
+    [Then(@"^it is (\S+) bytes and (\S+) characters$")]
+    public void ThenMost(string bytes, string chars)
+    {
+        Assert.Equal(bytes, mostBytes);
+        Assert.Equal(chars, mostChars);
+    }
+
+    [Then(@"^the Plan 9 encoding is named ""(.*)"", with the web name ""(.*)"" and the code page (\d+)$")]
+    public void ThenNamed(string name, string webName, int codePage)
+    {
+        Assert.Equal(name, plan9.EncodingName);
+        Assert.Equal(webName, plan9.WebName);
+        Assert.Equal(codePage, plan9.CodePage);
+    }
+
+    [Then(@"^it is equal to another Plan 9 encoding, with the same hash, and not to \.NET's UTF-8$")]
+    public void ThenEqual()
+    {
+        var other = new Plan9Utf8Encoding();
+        Assert.True(plan9.Equals(other));
+        Assert.Equal(plan9.GetHashCode(), other.GetHashCode());
+        Assert.False(plan9.Equals(Encoding.UTF8));
+        Assert.False(plan9.Equals(null));
+    }
+
+    [When(@"^(.+) is called on the Plan 9 encoding and on \.NET's UTF-8$")]
+    public void WhenCalled(string call)
+    {
+        refusals = [Refusal(plan9, call), Refusal(Encoding.UTF8, call)];
+    }
+
+    [Then(@"^both throw (\w+)$")]
+    public void ThenBothThrow(string exception) => Assert.All(refusals, thrown => Assert.Equal(exception, thrown));
+
+    private static string Most(Func<int> count)
+    {
+        try
+        {
+            return count().ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+        catch (ArgumentOutOfRangeException)
+        {
+            return "refused";
+        }
+    }
+
+    private static string Refusal(Encoding encoding, string call)
+    {
+        char[] chars = ['a'];
+        byte[] bytes = [0x61];
+        Action act = call switch
+        {
+            "GetByteCount with no characters" => () => encoding.GetByteCount((char[])null!, 0, 0),
+            "GetBytes with no characters" => () => encoding.GetBytes((char[])null!, 0, 0, bytes, 0),
+            "GetBytes with nowhere to write" => () => encoding.GetBytes(chars, 0, 1, null!, 0),
+            "GetCharCount with no bytes" => () => encoding.GetCharCount(null!, 0, 0),
+            "GetChars with no bytes" => () => encoding.GetChars(null!, 0, 0, chars, 0),
+            "GetChars with nowhere to write" => () => encoding.GetChars(bytes, 0, 1, null!, 0),
+            "GetBytes of a euro into two bytes" => () => encoding.GetBytes(['\u20ac'], 0, 1, new byte[2], 0),
+            "GetChars of an emoji into one character" => () => encoding.GetChars([0xf0, 0x9f, 0x98, 0x80], 0, 4, new char[1], 0),
+            "a decoder's GetCharCount with no bytes" => () => encoding.GetDecoder().GetCharCount(null!, 0, 0, flush: true),
+            "a decoder's GetChars with no bytes" => () => encoding.GetDecoder().GetChars(null!, 0, 0, chars, 0, flush: true),
+            "a decoder's GetChars with nowhere to write" => () => encoding.GetDecoder().GetChars(bytes, 0, 1, null!, 0, flush: true),
+            "an encoder's GetByteCount with no characters" => () => encoding.GetEncoder().GetByteCount(null!, 0, 0, flush: true),
+            "an encoder's GetBytes with no characters" => () => encoding.GetEncoder().GetBytes(null!, 0, 0, bytes, 0, flush: true),
+            "an encoder's GetBytes with nowhere to write" => () => encoding.GetEncoder().GetBytes(chars, 0, 1, null!, 0, flush: true),
+            _ => throw new ArgumentException($"no call named {call}", nameof(call)),
+        };
+
+        try
+        {
+            act();
+            return "nothing";
+        }
+        catch (ArgumentException thrown)
+        {
+            return thrown.GetType().Name;
+        }
     }
 }

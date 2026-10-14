@@ -85,6 +85,7 @@ Feature: UTF-8 strings are counted, searched, copied and compared as 9front's li
       | utfrune  | 0x20AC  | 61 00 e2 82 ac          | nowhere |
       | utfrrune | 0x20AC  | e2 82 ac 00 e2 82 ac    | 0       |
       | utfrune  | 0x80    | e2 82 c2 80             | 2       |
+      | utfrrune | 0x80    | c2 80 80                | 0       |
       | utfrune  | 0xD800  | 61 ed a0 80             | 1       |
       | utfrune  | 0x110000 | 61 ef bf bd            | 1       |
       | utfrrune | 0xAA    | c2 aa c2 aa c2 aa       | 4       |
@@ -105,6 +106,8 @@ Feature: UTF-8 strings are counted, searched, copied and compared as 9front's li
       | 63       | 61 00 63          | nowhere |
       | 82 ac    | e2 82 ac          | 1       |
       | 61 62 63 | 61 62             | nowhere |
+      | 62 63    | 62 61 62 63       | 2       |
+      | 61 62    | 61 61 62          | 1       |
 
   @UTF_009
   Scenario Outline: utfecpy copies a string into a buffer, leaving out the last rune it has room for when the NUL does not fit

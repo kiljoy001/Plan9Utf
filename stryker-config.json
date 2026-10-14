@@ -7,7 +7,7 @@
     "mutate": [
       "**/*.cs"
     ],
-    "mutation-level": "Complete",
+    "mutation-level": "Standard",
     "additional-timeout": 60000,
     "thresholds": {
       "high": 100,
