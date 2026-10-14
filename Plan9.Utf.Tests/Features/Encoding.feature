@@ -8,7 +8,7 @@ Feature: .NET text goes to and from UTF-8 as Plan 9 reads and writes it
   its own. Writing, a high surrogate followed by a low one is the rune they pair to, and any other
   surrogate is written as the rune it is. Bytes encoding a high surrogate and then a low one are
   the one thing that does not come back as it was: in .NET they are a pair, which is written as
-  the rune it stands for. A decoder holds what a sequence has of itself until the rest comes or
+  the rune it stands for; spans of runes hold them apart. A decoder holds what a sequence has of itself until the rest comes or
   it is flushed, and an encoder holds a high surrogate until the next character. Plan 9 counts a
   string by its bytes or by its runes, where .NET counts it in UTF-16; utflen counts the runes of
   what the encoding writes.

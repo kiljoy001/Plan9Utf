@@ -3,7 +3,7 @@ namespace Plan9.Utf;
 // libc/port's rune.c and utf*.c. A run of bytes stands for a C string: it ends at its first NUL,
 // and reading past its end reads the NUL. A Rune is 32 bits without a sign, and a long is an int,
 // as both are in 9front; a place that is nil in C is -1 here.
-public static class Utf
+public static partial class Utf
 {
     public const int UtfMax = 4;
     public const int RuneSync = 0x80;

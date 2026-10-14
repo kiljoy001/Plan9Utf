@@ -8,7 +8,6 @@ public sealed class UtfSteps(Outcome outcome)
 {
     private uint rune;
     private bool answer;
-    private int found;
     private byte[] buffer = [];
 
     [When(@"^chartorune reads ""(.*)""$")]
@@ -62,16 +61,16 @@ public sealed class UtfSteps(Outcome outcome)
     public void WhenUtfNLen(string bytes) => outcome.Count = Utf.UtfNLen(Outcome.Hex(bytes));
 
     [When(@"^utfrune looks for (\S+) in ""(.*)""$")]
-    public void WhenUtfRune(string value, string bytes) => found = Utf.UtfRune(Outcome.Hex(bytes), (int)Outcome.Rune(value));
+    public void WhenUtfRune(string value, string bytes) => outcome.Found = Utf.UtfRune(Outcome.Hex(bytes), (int)Outcome.Rune(value));
 
     [When(@"^utfrrune looks for (\S+) in ""(.*)""$")]
-    public void WhenUtfRRune(string value, string bytes) => found = Utf.UtfRRune(Outcome.Hex(bytes), (int)Outcome.Rune(value));
+    public void WhenUtfRRune(string value, string bytes) => outcome.Found = Utf.UtfRRune(Outcome.Hex(bytes), (int)Outcome.Rune(value));
 
     [When(@"^utfutf looks for ""(.*)"" in ""(.*)""$")]
-    public void WhenUtfUtf(string needle, string bytes) => found = Utf.UtfUtf(Outcome.Hex(bytes), Outcome.Hex(needle));
+    public void WhenUtfUtf(string needle, string bytes) => outcome.Found = Utf.UtfUtf(Outcome.Hex(bytes), Outcome.Hex(needle));
 
     [Then(@"^it is found at (\d+|nowhere)$")]
-    public void ThenFound(string place) => Assert.Equal(place == "nowhere" ? -1 : int.Parse(place, System.Globalization.CultureInfo.InvariantCulture), found);
+    public void ThenFound(string place) => Assert.Equal(place == "nowhere" ? -1 : int.Parse(place, System.Globalization.CultureInfo.InvariantCulture), outcome.Found);
 
     [Given(@"^a buffer of (\d+) bytes holding ""(.*)""$")]
     public void GivenBuffer(int size, string bytes)

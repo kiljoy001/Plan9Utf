@@ -11,6 +11,10 @@ public sealed class Outcome
 
     public int Count { get; set; }
 
+    public int Found { get; set; }
+
+    public uint[] Runes { get; set; } = [];
+
     // "e2 82 ac" as its bytes.
     public static byte[] Hex(string bytes)
         => [.. bytes.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(b => byte.Parse(b, NumberStyles.HexNumber, CultureInfo.InvariantCulture))];
@@ -24,6 +28,20 @@ public sealed class Outcome
         => value.StartsWith("0x", StringComparison.Ordinal)
             ? uint.Parse(value[2..], NumberStyles.HexNumber, CultureInfo.InvariantCulture)
             : unchecked((uint)int.Parse(value, CultureInfo.InvariantCulture));
+
+    // "0x61 0x0" as the runes it lists.
+    public static uint[] RuneList(string runes) => [.. runes.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(Rune)];
+
+    public static string ShowRunes(ReadOnlySpan<uint> runes)
+    {
+        var shown = new List<string>();
+        foreach (uint rune in runes)
+        {
+            shown.Add($"0x{rune:X}");
+        }
+
+        return string.Join(' ', shown);
+    }
 
     public static string ShowUnits(string text) => string.Join(' ', text.Select(c => ((int)c).ToString("X4", CultureInfo.InvariantCulture)));
 

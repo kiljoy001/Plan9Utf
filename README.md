@@ -39,6 +39,26 @@ a sequence split between calls and an encoder that holds a high surrogate. Its b
 text, so a NUL is a character. A high surrogate's bytes followed by a low one's come back as a
 UTF-16 pair, which is written as the rune it stands for.
 
+## Runes in spans
+
+UTF-16 cannot hold every run of runes, so runes can be held in spans of `uint`, as 9front holds
+them in `Rune` arrays. `ToRunes` reads every byte as `chartorune` does, `ToUtf` writes every rune
+as `runetochar` does, and `CountRunes` and `RuneNLen` give the sizes. Runes go through UTF-8 and
+back as they were, surrogates and all, except those `runetochar` does not write as themselves:
+one above `Runemax` is written as `Runeerror`, and one with its top bit set as its low byte.
+
+```csharp
+uint[] runes = new uint[Utf.CountRunes(bytes)];
+Utf.ToRunes(bytes, runes);
+byte[] back = new byte[Utf.RuneNLen(runes)];
+Utf.ToUtf(runes, back);
+```
+
+`RuneStrLen`, `RuneStrCmp`, `RuneStrNCmp`, `RuneStrChr`, `RuneStrRChr`, `RuneStrStr`,
+`RuneStrECpy`, `RuneStrCpy`, `RuneStrNCpy`, `RuneStrCat`, `RuneStrNCat` and `RuneStrDup` are
+libc's `runestr` functions over such spans, which end at their first 0 as C strings do. Where the
+C would write past the end of a buffer, the call is refused and nothing is written.
+
 ## Where it differs from 9front
 
 - `utfrune` and `utfrrune` find a rune below `Runesync` by its low byte, as amd64's `strchr` does;

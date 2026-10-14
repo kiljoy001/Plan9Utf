@@ -2,7 +2,7 @@
 
 ## 9front
 
-Plan9.Utf ports `sys/src/libc/port/rune.c`, `utflen.c`, `utfnlen.c`, `utfrune.c`, `utfrrune.c`, `utfutf.c`, `utfecpy.c` and `utfncmp.c`, and the `strchr`, `strrchr`, `strstr` and `memccpy` they call, from 9front (https://git.9front.org/plan9front/plan9front), under its MIT license:
+Plan9.Utf ports `sys/src/libc/port/rune.c`, `utflen.c`, `utfnlen.c`, `utfrune.c`, `utfrrune.c`, `utfutf.c`, `utfecpy.c`, `utfncmp.c` and the `runestr*.c` files, and the `strchr`, `strrchr`, `strstr` and `memccpy` they call, from 9front (https://git.9front.org/plan9front/plan9front), under its MIT license:
 
     Copyright © 2021 Plan 9 Foundation
     Copyright © 20XX 9front authors
