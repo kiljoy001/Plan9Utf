@@ -1,0 +1,50 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,fs}]
+indent_style = space
+indent_size = 4
+
+[*.cs]
+dotnet_analyzer_diagnostic.severity = none
+dotnet_diagnostic.CA2000.severity = warning
+dotnet_diagnostic.CA2016.severity = warning
+dotnet_diagnostic.CA2201.severity = warning
+
+# StyleCop's default rules, as errors, on every C# project including tests.
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpacingRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.ReadabilityRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.OrderingRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.NamingRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.MaintainabilityRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.LayoutRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.DocumentationRules.severity = error
+dotnet_analyzer_diagnostic.category-StyleCop.CSharp.SpecialRules.severity = error
+dotnet_diagnostic.SA0001.severity = none
+
+# Members are not documented by rule, a summary need not list every parameter and return
+# value, and files carry no license header.
+dotnet_diagnostic.SA1600.severity = none
+dotnet_diagnostic.SA1601.severity = none
+dotnet_diagnostic.SA1602.severity = none
+dotnet_diagnostic.SA1611.severity = none
+dotnet_diagnostic.SA1615.severity = none
+dotnet_diagnostic.SA1616.severity = none
+dotnet_diagnostic.SA1618.severity = none
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1634.severity = none
+dotnet_diagnostic.SA1635.severity = none
+dotnet_diagnostic.SA1636.severity = none
+dotnet_diagnostic.SA1637.severity = none
+dotnet_diagnostic.SA1638.severity = none
+dotnet_diagnostic.SA1639.severity = none
+dotnet_diagnostic.SA1640.severity = none
+dotnet_diagnostic.SA1641.severity = none
+
+# Members are reached without a this. prefix.
+dotnet_diagnostic.SA1101.severity = none

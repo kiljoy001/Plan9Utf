@@ -1,0 +1,13 @@
+bin/
+obj/
+*.user
+.idea/
+.vs/
+.artifacts/
+StrykerOutput/
+TestResults/
+*.nupkg
+*.snupkg
+
+# Reqnroll-generated code-behind
+*.feature.cs

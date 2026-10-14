@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Plan9.Utf.Tests/Plan9.Utf.Tests.csproj" />
+  <Project Path="Plan9.Utf/Plan9.Utf.csproj" />
+</Solution>
