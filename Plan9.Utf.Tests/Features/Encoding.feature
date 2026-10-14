@@ -171,9 +171,21 @@ Feature: .NET text goes to and from UTF-8 as Plan 9 reads and writes it
       | GetChars with nowhere to write             | ArgumentNullException       |
       | GetBytes of a euro into two bytes          | ArgumentException           |
       | GetChars of an emoji into one character    | ArgumentException           |
+      | GetChars of a letter into no characters    | ArgumentException           |
       | a decoder's GetCharCount with no bytes     | ArgumentNullException       |
       | a decoder's GetChars with no bytes         | ArgumentNullException       |
       | a decoder's GetChars with nowhere to write | ArgumentNullException       |
       | an encoder's GetByteCount with no characters | ArgumentNullException     |
       | an encoder's GetBytes with no characters   | ArgumentNullException       |
       | an encoder's GetBytes with nowhere to write | ArgumentNullException      |
+
+  @UTF_017
+  Scenario Outline: Too little room to write in is refused, saying so
+    When <call> is called on the Plan 9 encoding
+    Then it is refused with "<message>"
+
+    Examples:
+      | call                                    | message                                                     |
+      | GetChars of a letter into no characters | The output buffer is too small for the characters. (Parameter 'chars') |
+      | GetChars of an emoji into one character | The output buffer is too small for the characters. (Parameter 'chars') |
+      | GetBytes of a euro into two bytes       | The output buffer is too small for the bytes. (Parameter 'bytes')      |

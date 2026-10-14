@@ -172,6 +172,12 @@ public sealed class EncodingSteps(Outcome outcome)
         refusals = [Refusal(plan9, call), Refusal(Encoding.UTF8, call)];
     }
 
+    [When(@"^(.+) is called on the Plan 9 encoding$")]
+    public void WhenCalledOnPlan9(string call) => refusals = [Refusal(plan9, call, message: true)];
+
+    [Then(@"^it is refused with ""(.*)""$")]
+    public void ThenRefusedWith(string message) => Assert.Equal(message, Assert.Single(refusals));
+
     [Then(@"^both throw (\w+)$")]
     public void ThenBothThrow(string exception) => Assert.All(refusals, thrown => Assert.Equal(exception, thrown));
 
@@ -187,7 +193,7 @@ public sealed class EncodingSteps(Outcome outcome)
         }
     }
 
-    private static string Refusal(Encoding encoding, string call)
+    private static string Refusal(Encoding encoding, string call, bool message = false)
     {
         char[] chars = ['a'];
         byte[] bytes = [0x61];
@@ -200,6 +206,7 @@ public sealed class EncodingSteps(Outcome outcome)
             "GetChars with no bytes" => () => encoding.GetChars(null!, 0, 0, chars, 0),
             "GetChars with nowhere to write" => () => encoding.GetChars(bytes, 0, 1, null!, 0),
             "GetBytes of a euro into two bytes" => () => encoding.GetBytes(['\u20ac'], 0, 1, new byte[2], 0),
+            "GetChars of a letter into no characters" => () => encoding.GetChars(bytes, 0, 1, [], 0),
             "GetChars of an emoji into one character" => () => encoding.GetChars([0xf0, 0x9f, 0x98, 0x80], 0, 4, new char[1], 0),
             "a decoder's GetCharCount with no bytes" => () => encoding.GetDecoder().GetCharCount(null!, 0, 0, flush: true),
             "a decoder's GetChars with no bytes" => () => encoding.GetDecoder().GetChars(null!, 0, 0, chars, 0, flush: true),
@@ -217,7 +224,7 @@ public sealed class EncodingSteps(Outcome outcome)
         }
         catch (ArgumentException thrown)
         {
-            return thrown.GetType().Name;
+            return message ? thrown.Message : thrown.GetType().Name;
         }
     }
 }

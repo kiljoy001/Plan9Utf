@@ -1,0 +1,19 @@
+[
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[0] = (byte)(T2 | (c >> (1 * Bitx)));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[0] = (byte)(T3 | (c >> (2 * Bitx)));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[1] = (byte)(Tx | ((c >> (1 * Bitx)) & Maskx));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[0] = (byte)(T4 | (c >> (3 * Bitx)));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[1] = (byte)(Tx | ((c >> (2 * Bitx)) & Maskx));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Survived", "file": "Utf.cs", "mutator": "Bitwise mutation", "line": "str[2] = (byte)(Tx | ((c >> (1 * Bitx)) & Maskx));", "reason": "c is above Rune1 here, so not negative, and >>> shifts it as >> does" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Statement mutation", "line": "i++;", "reason": "utfnlen no longer steps past a byte below Runeself, so its loop never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Arithmetic mutation", "line": "p = at + found;", "reason": "utfrrune's search starts again where it found the rune, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Logical mutation", "line": "while (end > 0 && (to[--end] & 0xC0) == 0x80)", "reason": "utfecpy's walk back over continuation bytes no longer stops at the buffer's start" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Negate expression", "line": "while (end > 0 && (to[--end] & 0xC0) == 0x80)", "reason": "utfecpy's walk back over continuation bytes no longer stops at the buffer's start" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Arithmetic mutation", "line": "for (int at = 0, found; (found = StrChr(s[at..], c)) >= 0; at = r + 1)", "reason": "strrchr's search starts again where it found the byte, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Arithmetic mutation", "line": "r = at + found;", "reason": "strrchr's search starts again where it found the byte, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Block removal mutation", "line": "{", "reason": "strstr's comparison no longer moves on through the needle, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Conditional (false) mutation", "line": "return found < 0 ? -1 : p + 1 + found;", "reason": "strstr goes on looking after strchr finds nothing more, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Equality mutation", "line": "return found < 0 ? -1 : p + 1 + found;", "reason": "strstr goes on looking after strchr finds nothing more, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "UnaryMinusExpression to UnaryPlusExpression mutation", "line": "return found < 0 ? -1 : p + 1 + found;", "reason": "strstr goes on looking after strchr finds nothing more, so never ends" },
+  { "status": "Timeout", "file": "Utf.cs", "mutator": "Arithmetic mutation", "line": "return found < 0 ? -1 : p + 1 + found;", "reason": "strstr goes back to a place it has looked at, so never ends" }
+]
