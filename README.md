@@ -81,3 +81,10 @@ bash scripts/run-quality.sh
 `.artifacts/package`.
 
 The features in `Plan9.Utf.Tests/Features` give the behaviour, row by row, against the C.
+
+## Release
+
+Pushing a tag `v` followed by the package's version runs `.github/workflows/release.yml`, which
+builds, tests and packs that tag and pushes the package to nuget.org through Trusted Publishing.
+A tag pushed before the workflow existed can be released with
+`gh workflow run release.yml -f tag=v0.1.0`.
