@@ -13,6 +13,9 @@ public sealed class Outcome
 
     public int Found { get; set; }
 
+    // The message of the ArgumentException a call threw, or what else it threw.
+    public string? Refusal { get; set; }
+
     public uint[] Runes { get; set; } = [];
 
     // "e2 82 ac" as its bytes.

@@ -173,10 +173,7 @@ public sealed class EncodingSteps(Outcome outcome)
     }
 
     [When(@"^(.+) is called on the Plan 9 encoding$")]
-    public void WhenCalledOnPlan9(string call) => refusals = [Refusal(plan9, call, message: true)];
-
-    [Then(@"^it is refused with ""(.*)""$")]
-    public void ThenRefusedWith(string message) => Assert.Equal(message, Assert.Single(refusals));
+    public void WhenCalledOnPlan9(string call) => outcome.Refusal = Refusal(plan9, call, message: true);
 
     [Then(@"^both throw (\w+)$")]
     public void ThenBothThrow(string exception) => Assert.All(refusals, thrown => Assert.Equal(exception, thrown));

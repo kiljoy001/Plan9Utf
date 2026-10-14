@@ -7,7 +7,6 @@ namespace Plan9.Utf.Tests.Steps;
 public sealed class RuneStringSteps(Outcome outcome)
 {
     private uint[] buffer = [];
-    private Exception? refusal;
 
     [When(@"^ToRunes reads ""(.*)""$")]
     public void WhenToRunes(string bytes)
@@ -45,13 +44,13 @@ public sealed class RuneStringSteps(Outcome outcome)
     public void WhenCounted(string bytes) => outcome.Count = Utf.CountRunes(Outcome.Hex(bytes));
 
     [When(@"^ToRunes reads ""(.*)"" into a span of (\d+)$")]
-    public void WhenToRunesInto(string bytes, int size) => refusal = Record(() => Utf.ToRunes(Outcome.Hex(bytes), new uint[size]));
+    public void WhenToRunesInto(string bytes, int size) => outcome.Refusal = Record(() => Utf.ToRunes(Outcome.Hex(bytes), new uint[size]));
 
     [When(@"^ToUtf writes the runes ""(.*)"" into a span of (\d+)$")]
-    public void WhenToUtfInto(string runes, int size) => refusal = Record(() => Utf.ToUtf(Outcome.RuneList(runes), new byte[size]));
+    public void WhenToUtfInto(string runes, int size) => outcome.Refusal = Record(() => Utf.ToUtf(Outcome.RuneList(runes), new byte[size]));
 
-    [Then(@"^it is refused with ""(.*)""$")]
-    public void ThenRefused(string message) => Assert.Equal(message, Assert.IsType<ArgumentException>(refusal).Message);
+    [Then(@"^it is refused with ""([^""]*)""$")]
+    public void ThenRefused(string message) => Assert.Equal(message, outcome.Refusal);
 
     [When(@"^runestrlen counts ""(.*)""$")]
     public void WhenRuneStrLen(string runes) => outcome.Count = Utf.RuneStrLen(Outcome.RuneList(runes));
@@ -85,28 +84,28 @@ public sealed class RuneStringSteps(Outcome outcome)
     }
 
     [When(@"^runestrcpy copies ""(.*)"" into it$")]
-    public void WhenRuneStrCpy(string runes) => refusal = Record(() => Utf.RuneStrCpy(buffer, Outcome.RuneList(runes)));
+    public void WhenRuneStrCpy(string runes) => outcome.Refusal = Record(() => Utf.RuneStrCpy(buffer, Outcome.RuneList(runes)));
 
     [When(@"^runestrncpy copies (-?\d+) of ""(.*)"" into it$")]
-    public void WhenRuneStrNCpy(int n, string runes) => refusal = Record(() => Utf.RuneStrNCpy(buffer, Outcome.RuneList(runes), n));
+    public void WhenRuneStrNCpy(int n, string runes) => outcome.Refusal = Record(() => Utf.RuneStrNCpy(buffer, Outcome.RuneList(runes), n));
 
     [When(@"^runestrcat adds ""(.*)"" into it$")]
-    public void WhenRuneStrCat(string runes) => refusal = Record(() => Utf.RuneStrCat(buffer, Outcome.RuneList(runes)));
+    public void WhenRuneStrCat(string runes) => outcome.Refusal = Record(() => Utf.RuneStrCat(buffer, Outcome.RuneList(runes)));
 
     [When(@"^runestrncat adds (-?\d+) of ""(.*)"" into it$")]
-    public void WhenRuneStrNCat(int n, string runes) => refusal = Record(() => Utf.RuneStrNCat(buffer, Outcome.RuneList(runes), n));
+    public void WhenRuneStrNCat(int n, string runes) => outcome.Refusal = Record(() => Utf.RuneStrNCat(buffer, Outcome.RuneList(runes), n));
 
     [Then(@"^the buffer holds ""(.*)""$")]
     public void ThenBufferHolds(string runes)
     {
-        Assert.Null(refusal);
+        Assert.Null(outcome.Refusal);
         Assert.Equal(runes, Outcome.ShowRunes(buffer));
     }
 
-    [Then(@"^it is refused with ""(.*)"", and the buffer holds ""(.*)""$")]
+    [Then(@"^it is refused with ""([^""]*)"", and the buffer holds ""(.*)""$")]
     public void ThenRefusedAndHolds(string message, string runes)
     {
-        Assert.Equal(message, Assert.IsType<ArgumentException>(refusal).Message);
+        Assert.Equal(message, outcome.Refusal);
         Assert.Equal(runes, Outcome.ShowRunes(buffer));
     }
 
@@ -123,7 +122,7 @@ public sealed class RuneStringSteps(Outcome outcome)
         return bytes;
     }
 
-    private static Exception? Record(Action act)
+    private static string? Record(Action act)
     {
         try
         {
@@ -132,7 +131,7 @@ public sealed class RuneStringSteps(Outcome outcome)
         }
         catch (Exception thrown)
         {
-            return thrown;
+            return thrown.GetType() == typeof(ArgumentException) ? thrown.Message : thrown.ToString();
         }
     }
 }
