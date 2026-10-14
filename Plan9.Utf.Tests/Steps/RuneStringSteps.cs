@@ -50,8 +50,8 @@ public sealed class RuneStringSteps(Outcome outcome)
     [When(@"^ToUtf writes the runes ""(.*)"" into a span of (\d+)$")]
     public void WhenToUtfInto(string runes, int size) => refusal = Record(() => Utf.ToUtf(Outcome.RuneList(runes), new byte[size]));
 
-    [Then(@"^it is refused as too small$")]
-    public void ThenRefused() => Assert.IsType<ArgumentException>(refusal);
+    [Then(@"^it is refused with ""(.*)""$")]
+    public void ThenRefused(string message) => Assert.Equal(message, Assert.IsType<ArgumentException>(refusal).Message);
 
     [When(@"^runestrlen counts ""(.*)""$")]
     public void WhenRuneStrLen(string runes) => outcome.Count = Utf.RuneStrLen(Outcome.RuneList(runes));
@@ -103,10 +103,10 @@ public sealed class RuneStringSteps(Outcome outcome)
         Assert.Equal(runes, Outcome.ShowRunes(buffer));
     }
 
-    [Then(@"^it is refused as too small, and the buffer holds ""(.*)""$")]
-    public void ThenRefusedAndHolds(string runes)
+    [Then(@"^it is refused with ""(.*)"", and the buffer holds ""(.*)""$")]
+    public void ThenRefusedAndHolds(string message, string runes)
     {
-        Assert.IsType<ArgumentException>(refusal);
+        Assert.Equal(message, Assert.IsType<ArgumentException>(refusal).Message);
         Assert.Equal(runes, Outcome.ShowRunes(buffer));
     }
 

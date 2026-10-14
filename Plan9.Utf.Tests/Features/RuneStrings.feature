@@ -62,14 +62,14 @@ Feature: Runes are held in spans, as 9front holds them in Rune arrays, and worke
   @UTF_018
   Scenario Outline: A span too small for what would be written is refused
     When <call> into a span of <size>
-    Then it is refused as too small
+    Then it is refused with "<message>"
 
     Examples:
-      | call                                | size |
-      | ToRunes reads "61 62"               | 1    |
-      | ToRunes reads "e2 82"               | 1    |
-      | ToUtf writes the runes "0x41 0x42"  | 1    |
-      | ToUtf writes the runes "0x20AC"     | 2    |
+      | call                                | size | message                                                    |
+      | ToRunes reads "61 62"               | 1    | The span is too small for the runes. (Parameter 'runes')   |
+      | ToRunes reads "e2 82"               | 1    | The span is too small for the runes. (Parameter 'runes')   |
+      | ToUtf writes the runes "0x41 0x42"  | 1    | The span is too small for the bytes. (Parameter 'utf')     |
+      | ToUtf writes the runes "0x20AC"     | 2    | The span is too small for the bytes. (Parameter 'utf')     |
 
   @UTF_019
   Scenario Outline: runestrlen counts the runes before the 0
@@ -177,7 +177,7 @@ Feature: Runes are held in spans, as 9front holds them in Rune arrays, and worke
   Scenario Outline: A buffer the C would write past the end of is refused, and left as it was
     Given a buffer of runes "<before>"
     When <call> "<runes>" into it
-    Then it is refused as too small, and the buffer holds "<before>"
+    Then it is refused with "The buffer is too small for the runes. (Parameter 's1')", and the buffer holds "<before>"
 
     Examples:
       | before                  | call                    | runes          |

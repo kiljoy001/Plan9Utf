@@ -61,7 +61,7 @@ public static partial class Utf
             uint c2 = At(s2, i);
             if (c1 != c2)
             {
-                return c1 > c2 ? 1 : -1;
+                return Math.Sign(c1.CompareTo(c2));
             }
 
             if (c1 == 0)
@@ -80,7 +80,7 @@ public static partial class Utf
             n--;
             if (c1 != c2)
             {
-                return c1 > c2 ? 1 : -1;
+                return Math.Sign(c1.CompareTo(c2));
             }
 
             if (c1 == 0)
@@ -203,9 +203,7 @@ public static partial class Utf
 
     public static void RuneStrCat(Span<uint> s1, ReadOnlySpan<uint> s2)
     {
-        int end = RuneStrLen(s1);
-        Room(s1, end + RuneStrLen(s2) + 1);
-        RuneStrCpy(s1[end..], s2);
+        RuneStrCpy(s1[RuneStrLen(s1)..], s2);
     }
 
     // runestrncat copies s2 after s1 until it has copied s2's 0, or n runes and one more, which it
